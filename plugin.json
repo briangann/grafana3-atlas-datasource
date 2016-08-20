@@ -1,0 +1,21 @@
+{
+  "type": "datasource",
+  "name": "Atlas",
+  "id": "grafana3-atlas-datasource",
+
+  "atlasFormat": "std.json",
+
+  "metrics": true,
+  "annotations": false,
+
+  "info": {
+    "description": "Grafana 3.x plugin for Netflix Atlas backend",
+    "author": {
+      "name": "Brian Gann (bkgann@gmail.com)",
+      "url": "https://github.com/briangann/grafana3-atlas-datasource"
+    },
+    "keywords": ["atlas", "datasource"],
+    "version": "0.1.0",
+    "updated": "2016-08-19"
+  }
+}

@@ -1,0 +1,117 @@
+<query-editor-row query-ctrl="ctrl" can-collapse="false" class="atlas-datasource-query-row">
+	<!-- Toggle raw vs hints -->
+	<div class="gf-form-inline">
+
+		<div class="gf-form" ng-if="ctrl.target.rawQueryInput">
+			<label class="gf-form-label query-keyword width-10">
+				Raw Query:
+				<info-popover mode="right-normal">
+					Enter a custom atlas query
+				</info-popover>
+			</label>
+			<input type="text" class="gf-form-input" style="width: 800px;" ng-model="ctrl.target.rawQuery" spellcheck="false" placeholder="Raw Atlas query expression" data-min-length="0" data-items="100" ng-model-onblur ng-model-options="{ debounce: 1000 }" ng-change="ctrl.onChangeInternal()">
+		</div>
+
+
+		<div ng-if="!ctrl.target.rawQueryInput">
+			<div class="gf-form">
+				<metric-segment-model property="ctrl.target.target" get-options="ctrl.getOptions()" on-change="ctrl.onChangeInternal()" style="width: 300px;"></metric-segment-model>
+			</div>
+			<div class="tight-form">
+            <div class="tight-form-item" style="width: 94px">
+                Alias
+            </div>
+            <input type="text"
+                   class="input-xlarge tight-form-input"
+                   ng-model="ctrl.target.alias"
+                   spellcheck="false"
+                   placeholder="metric alias"
+                   data-min-length="0" data-items="100"
+                   ng-model-onblur
+                   ng-model-options="{ debounce: 1000 }"
+                   ng-change="ctrl.onChangeInternal()">
+        </div>
+		</div>
+
+		<div class="gf-form">
+			<editor-checkbox text="Raw Query" model="target.rawQueryInput" change="ctrl.toggleRawQuery()"></editor-checkbox>
+		</div>
+
+	</div>
+
+
+	<!-- Dimensions -->
+	<div class="gf-form">
+
+		<button class="btn btn-inverse" ng-click="ctrl.addTag()" ng-hide="datasource.meta.mixed">
+			<i class="fa fa-plus"></i>&nbsp; Dimension
+		</button>
+	</div>
+
+
+	<!--	<div class="gf-form-inline" ng-if="ctrl.target.tags && ctrl.target.tags.length > 0"> -->
+
+	<div ng-if="ctrl.target.tags && ctrl.target.tags.length > 0">
+		<div class="gf-form-inline" ng-repeat="tag in ctrl.target.tags">
+			<div class="gf-form">
+
+				<select class="gf-form-input gf-size-auto" id="logical" ng-model="tag.logical" ng-options="logical for logical in atlas.logical track by logical" ng-change="ctrl.onChangeInternal()" ng-required="true" ng-default="tag.logical" style="width: 70px; margin-bottom: 0">
+				</select>
+
+				<metric-segment-model css-class="width-24" property="tag.name" get-options="ctrl.getDimensionsForMetric()" on-change="ctrl.onChangeInternal()">
+				</metric-segment-model>
+
+				<select class="gf-form-select-wrapper" id="notCondition" ng-model="tag.notCondition" ng-options="notCondition for notCondition in atlas.notCondition track by notCondition" style="width: 70px; margin-bottom: 0" ng-required="true" ng-change="ctrl.onChangeInternal()">
+				</select>
+
+				<select class="gf-form-select-wrapper" id="matchers" ng-model="tag.matcher" ng-options="matcher for matcher in atlas.matchers track by matcher" style="width: 70px; margin-bottom: 0" ng-change="ctrl.onChangeInternal()">
+				</select>
+
+				<metric-segment-model property="tag.value" get-options="ctrl.getDimensionValues(tag.name)" on-change="ctrl.onChangeInternal()" css-class="width-24">
+				</metric-segment-model>
+
+				<a class="pointer" tabindex="1" ng-click="ctrl.removeTag(tag)">
+					<i class="fa fa-remove"></i>
+				</a>
+			</div>
+
+		</div>
+
+	</div>
+
+
+	<!-- Aggregations -->
+	<div class="gf-form-inline">
+		<div class="gf-form">
+
+			<label class="gf-form-label query-keyword width-10">
+				Aggregation:
+				<info-popover mode="right-normal">
+					Aggregation type to apply to query
+				</info-popover>
+			</label>
+			<select class="gf-form-select-wrapper" id="aggregationSelect" ng-model="ctrl.target.aggregation" ng-options="aggregation for aggregation in atlas.aggregations track by aggregation" style="width: 80px; margin-bottom: 0" ng-change="ctrl.onChangeInternal()"
+							ng-required="true">
+			</select>
+		</div>
+	</div>
+	<!-- Groupings -->
+	<div class="gf-form">
+		<button class="btn btn-inverse" ng-click="ctrl.addGroupBy()">
+			<i class="fa fa-plus"></i>&nbsp; Group By
+		</button>
+	</div>
+
+	<div ng-if="ctrl.target.groupBys && ctrl.target.groupBys.length > 0">
+		<div ng-repeat="groupBy in ctrl.target.groupBys">
+			<div class="gf-form">
+
+				<input type="text" ng-model="groupBy.name" spellcheck="false" placeholder="group by" data-min-length=0 data-items=50 ng-size="groupBy.name.length" ng-model-onblur ng-change="get_data()">
+				<a class="pointer" tabindex="1" ng-click="ctrl.removeGroupBy(groupBy)">
+					<i class="fa fa-remove"></i>
+				</a>
+			</div>
+
+		</div>
+	</div>
+</query-editor-row>
