@@ -4,9 +4,9 @@
 
 ![Grafana](http://grafana.org/assets/img/logo_new_transparent_200x48.png)
 
-![Atlas plugin for Grafana](https://briangann.github.io/)
+![Atlas plugin for Grafana](https://briangann.github.io/grafana3-atlas-datasource/example-query.png)
 
-http://briangann.github.io/grafana3-atlas-datasource
+Additional docs at [github.io](https://briangann.github.io/grafana3-atlas-datasource)
 
 ### About this plugin
 This [Grafana 3.x](https://grafana.org) plugin for Atlas provides a query builder with aliases, dimensions, aggregations and grouping.
