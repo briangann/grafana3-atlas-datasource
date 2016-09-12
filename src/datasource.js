@@ -264,6 +264,10 @@ export class AtlasDatasource {
             var notAllNull = false;
             for (var i = 0; i < values.length; i++) {
                 var value = values[i];
+                // convert any NaN to nulls so the graph panel will connect them
+                if (value === "NaN") {
+                    value = null;
+                }
                 var timestamp = result.start + (i * result.step);
                 series.datapoints.push([value, timestamp]);
                 notAllZero = notAllZero || value !== 0;
