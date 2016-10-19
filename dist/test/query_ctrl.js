@@ -33,7 +33,7 @@ var AtlasDatasourceQueryCtrl = exports.AtlasDatasourceQueryCtrl = function (_Que
     function AtlasDatasourceQueryCtrl($scope, $injector, templateSrv, uiSegmentSrv) {
         _classCallCheck(this, AtlasDatasourceQueryCtrl);
 
-        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AtlasDatasourceQueryCtrl).call(this, $scope, $injector));
+        var _this = _possibleConstructorReturn(this, (AtlasDatasourceQueryCtrl.__proto__ || Object.getPrototypeOf(AtlasDatasourceQueryCtrl)).call(this, $scope, $injector));
 
         _this.scope = $scope;
         _this.uiSegmentSrv = uiSegmentSrv;

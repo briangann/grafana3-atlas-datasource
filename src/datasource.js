@@ -17,16 +17,26 @@ export class AtlasDatasource {
     }
 
     // Required for templating
-    metricFindQuery(options) {
-        return this.backendSrv.datasourceRequest({
-            url: this.url + '/api/v1/tags/name',
-            data: options,
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then(this.mapToTextValue);
+    metricFindQuery(query) {
+      var _this = this;
+      // default is to get tags from atlas
+      let urlPath = '/api/v1/tags/name';
+      // if we see a string as the query, this is a template query, otherwise it is a normal query
+      if (typeof(query) === "string") {
+        // TODO: support multiple tag queries
+        //
+        urlPath = '/api/v1/' + _this.templateSrv.replaceWithText(query);
+      }
+      // TODO: support multiple tags: Change this to a Promise.all
+      return this.backendSrv.datasourceRequest({
+        url: this.url + urlPath,
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }).then(this.mapToTextValue);
     }
+
     mapToTextValue(result) {
         return _.map(result.data, (d, i) => {
             return {
@@ -61,6 +71,7 @@ export class AtlasDatasource {
     query(options) {
         var queries = [];
         var _this = this;
+        var _scopeTags = _this.templateSrv.variables;
         options.targets.forEach(function(target) {
             if (target.hide || !(target.rawQuery || target.target)) {
                 return;
@@ -70,7 +81,9 @@ export class AtlasDatasource {
                     return;
                 }
                 var rawQueryParts = [];
-                rawQueryParts.push(target.rawQuery);
+                // replace template variables inside the rawQuery
+                let rawQueryReplaced = _this.templateSrv.replaceWithText(target.rawQuery);
+                rawQueryParts.push(rawQueryReplaced);
                 if (target.alias) {
                     var legend = target.alias;
                     rawQueryParts.push(legend);
@@ -87,12 +100,23 @@ export class AtlasDatasource {
                     });
                 }
                 var queryParts = [];
+                //debugger;
                 queryParts.push("name," + target.target + ",:eq");
+                if (_scopeTags) {
+                  for (var i = 0; i < _scopeTags.length; i++) {
+                    if (_scopeTags[i].current.text != 'All') {
+                      var x = _scopeTags[i];
+                      queryParts.push(_scopeTags[i].name + "," + _scopeTags[i].current.text + ",:eq,:and");
+                    }
+                  }
+                }
+                var hasPushAggregation = false;
+
                 if (target.tags) {
                     var logicals = [];
-                    for (var i = 0, len = target.tags.length; i < len; i++) {
+                    for (let i = 0, len = target.tags.length; i < len; i++) {
                       var aTag = target.tags[i];
-                      var valueReplaced = _this.templateSrv.replace(aTag.value);
+                      var valueReplaced = _this.templateSrv.replaceWithText(aTag.value);
                       // the replaced value for templates will be a comma separated list
                       if (valueReplaced.includes(',')) {
                           len = valueReplaced.length;
@@ -129,7 +153,8 @@ export class AtlasDatasource {
                           // legend must come before this matcher
                           // aggregation must come before this matcher, so the name must be pushed after
                           if (target.aggregation) {
-                              queryParts.push(":" + target.aggregation);
+                            hasPushAggregation = true;
+                            queryParts.push(":" + target.aggregation);
                           }
                           queryParts.push(aTag.name);
                           queryParts.push("(");
@@ -154,9 +179,10 @@ export class AtlasDatasource {
                     }
                     queryParts = queryParts.concat(logicals.reverse());
                 }
-                //if (target.aggregation) {
-                //    queryParts.push(":" + target.aggregation);
-                //}
+
+                if (target.aggregation && !hasPushAggregation) {
+                  queryParts.push(":" + target.aggregation);
+                }
                 if (target.groupBys && target.groupBys.length > 0) {
                     queryParts.push("(");
                     target.groupBys.forEach(function(groupBy) {
@@ -187,11 +213,13 @@ export class AtlasDatasource {
         var fullQuery = queries.join(',');
 
         var interval = options.interval;
+        console.log("options interval = " + interval );
         if (kbn.interval_to_ms(interval) < this.minimumInterval) {
             // console.log("Detected interval smaller than allowed: " + interval);
             interval = kbn.secondsToHms(this.minimumInterval / 1000);
             // console.log("New Interval: " + interval);
         }
+        console.log("interval after min check = " + interval );
 
         /*
                 var params = {
