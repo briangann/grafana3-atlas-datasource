@@ -70,8 +70,16 @@ export class AtlasDatasource {
 
     query(options) {
         var queries = [];
+        var shouldUpdate = false;
+        //only set the first time through
+        if (this.stepNumber == null){
+            this.stepNumber = 0;
+        }
+        if (this.stepUnit == null){
+            this.stepUnit = '';
+        }
         var _this = this;
-        var _scopeTags = _this.templateSrv.variables;
+        // var _scopeTags = _this.templateSrv.variables;
         options.targets.forEach(function(target) {
             if (target.hide || !(target.rawQuery || target.target)) {
                 return;
@@ -90,7 +98,8 @@ export class AtlasDatasource {
                     rawQueryParts.push(':legend');
                 }
                 queries.push(rawQueryParts.join(','));
-            } else {
+            }
+            else {
                 if (!target.target) {
                     return;
                 }
@@ -100,8 +109,11 @@ export class AtlasDatasource {
                     });
                 }
                 var queryParts = [];
-                //debugger;
                 queryParts.push("name," + target.target + ",:eq");
+
+                /*
+                  This is for multi-value selection from templateSrv, not supported right now...
+
                 if (_scopeTags) {
                   for (var i = 0; i < _scopeTags.length; i++) {
                     if (_scopeTags[i].current.text != 'All') {
@@ -110,6 +122,7 @@ export class AtlasDatasource {
                     }
                   }
                 }
+                */
                 var hasPushAggregation = false;
 
                 if (target.tags) {
@@ -205,15 +218,42 @@ export class AtlasDatasource {
                     queryParts.push(aliasLegend);
                     queryParts.push(':legend');
                 }
-
                 queries.push(queryParts.join(','));
             }
-        });
+            if (isNaN(target.stepNumber) && target.stepNumber != null){
+                alert("Only numbers are valid for the Step Size field");
+            }
+            if (target.stepNumber != null && target.stepNumber != this.stepNumber){
+                this.stepNumber = target.stepNumber;
+                shouldUpdate = true;
+            }
+            if (target.stepUnit != null && target.stepUnit != this.stepUnit){
+                this.stepUnit = target.stepUnit;
+                shouldUpdate = true;
+            }
+            if (shouldUpdate){
+                if (this.stepUnit == null || this.stepUnit === ''){
+                    this.stepUnit = 'm';
+                }
+                options.targets.forEach(function(target) {
+                    target.stepNumber = this.stepNumber;
+                    target.stepUnit = this.stepUnit;
+                },this);
+            }
+
+        },this);
         // Atlas can take multiple concatenated stack queries
         var fullQuery = queries.join(',');
-
-        var interval = options.interval;
-        console.log("options interval = " + interval );
+        var interval = '1m';
+        if (this.stepNumber === 0){
+            interval = options.interval;
+        }
+        else{
+            //update all the other targets so that they are all the same
+            //console.log("step unit =" + this.stepUnit);
+            interval = this.stepNumber+this.stepUnit;
+        }
+        //console.log("options interval = " + interval );
         if (kbn.interval_to_ms(interval) < this.minimumInterval) {
             // console.log("Detected interval smaller than allowed: " + interval);
             interval = kbn.secondsToHms(this.minimumInterval / 1000);

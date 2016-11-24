@@ -24,6 +24,12 @@ export class AtlasDatasourceQueryCtrl extends QueryCtrl {
             "cf-min",
             "cf-sum"
         ];
+        this.scope.atlas.steps = [
+            "s",
+            "m",
+            "h",
+            "d"
+        ];
         this.scope.atlas.logical = [
             "and",
             "or"
@@ -72,8 +78,8 @@ export class AtlasDatasourceQueryCtrl extends QueryCtrl {
         this.panelCtrl.refresh(); // Asks the panel to refresh data.
     }
 
-    toggleRawQuery() {
-        this.target.rawQueryInput = !this.target.rawQueryInput;
+    toggleRawQuery(aTarget) {
+        aTarget.rawQueryInput = !aTarget.rawQueryInput;
         this.panelCtrl.refresh();
     }
 
