@@ -76,6 +76,7 @@ System.register(["angular", "lodash", "app/plugins/sdk", "./css/query-editor.css
                     _this.target.target = _this.target.target || 'select metric';
                     _this.scope.atlas = {};
                     _this.scope.atlas.aggregations = ["sum", "avg", "count", "max", "min", "cf-avg", "cf-max", "cf-min", "cf-sum"];
+                    _this.scope.atlas.steps = ["s", "m", "h", "d"];
                     _this.scope.atlas.logical = ["and", "or"];
                     _this.scope.atlas.notCondition = [" ", "not"];
                     _this.scope.atlas.matchers = ["eq", "ge", "gt", "le", "lt", "has", "in", "re", "reic"];
@@ -112,8 +113,8 @@ System.register(["angular", "lodash", "app/plugins/sdk", "./css/query-editor.css
                     }
                 }, {
                     key: "toggleRawQuery",
-                    value: function toggleRawQuery() {
-                        this.target.rawQueryInput = !this.target.rawQueryInput;
+                    value: function toggleRawQuery(aTarget) {
+                        aTarget.rawQueryInput = !aTarget.rawQueryInput;
                         this.panelCtrl.refresh();
                     }
                 }, {

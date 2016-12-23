@@ -34,20 +34,21 @@
 		</div>
 
 		<div class="gf-form">
-			<editor-checkbox text="Raw Query" model="target.rawQueryInput" change="ctrl.toggleRawQuery()"></editor-checkbox>
+			<editor-checkbox text="Raw Query" model="ctrl.target.rawQueryInput"></editor-checkbox>
 		</div>
 
 	</div>
 
 
 	<!-- Dimensions -->
+	<div ng-if="!ctrl.target.rawQueryInput">
 	<div class="gf-form">
 
 		<button class="btn btn-inverse" ng-click="ctrl.addTag()" ng-hide="datasource.meta.mixed">
 			<i class="fa fa-plus"></i>&nbsp; Dimension
 		</button>
 	</div>
-
+	</div>
 
 	<!--	<div class="gf-form-inline" ng-if="ctrl.target.tags && ctrl.target.tags.length > 0"> -->
 
@@ -81,6 +82,8 @@
 
 
 	<!-- Aggregations -->
+	<div ng-if="!ctrl.target.rawQueryInput">
+
 	<div class="gf-form-inline">
 		<div class="gf-form">
 
@@ -95,6 +98,34 @@
 			</select>
 		</div>
 	</div>
+  </div>
+
+    <!-- Step Size -->
+    <div class="gf-form-inline">
+		<div class="gf-form">
+
+			<label class="gf-form-label query-keyword width-10">
+				Step Size:
+				<info-popover mode="right-normal">
+					The Step Size for atlas default(1m)
+				</info-popover>
+			</label>
+            <input type="text"
+                   class="input-medium tight-form-input"
+                   ng-model="ctrl.target.stepNumber"
+                   spellcheck="false"
+                   placeholder="Step Size"
+                   data-min-length="0" data-items="10"
+                   ng-model-onblur
+                   ng-model-options="{ debounce: 1000 }"
+                   ng-change="ctrl.onChangeInternal()">
+
+			<select class="gf-form-select-wrapper" id="stepSelect" ng-model="ctrl.target.stepUnit" ng-options="stepUnit for stepUnit in atlas.steps track by stepUnit" style="width: 80px; margin-bottom: 0" ng-change="ctrl.onChangeInternal()"
+							ng-required="true">
+			</select>
+		</div>
+	</div>
+
 	<!-- Groupings -->
 	<div class="gf-form">
 		<button class="btn btn-inverse" ng-click="ctrl.addGroupBy()">

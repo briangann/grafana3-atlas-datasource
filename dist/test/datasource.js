@@ -103,8 +103,16 @@ var AtlasDatasource = exports.AtlasDatasource = function () {
         key: "query",
         value: function query(options) {
             var queries = [];
+            var shouldUpdate = false;
+            //only set the first time through
+            if (this.stepNumber == null) {
+                this.stepNumber = 0;
+            }
+            if (this.stepUnit == null) {
+                this.stepUnit = '';
+            }
             var _this = this;
-            var _scopeTags = _this.templateSrv.variables;
+            // var _scopeTags = _this.templateSrv.variables;
             options.targets.forEach(function (target) {
                 if (target.hide || !(target.rawQuery || target.target)) {
                     return;
@@ -133,22 +141,25 @@ var AtlasDatasource = exports.AtlasDatasource = function () {
                         });
                     }
                     var queryParts = [];
-                    //debugger;
                     queryParts.push("name," + target.target + ",:eq");
-                    if (_scopeTags) {
-                        for (var i = 0; i < _scopeTags.length; i++) {
-                            if (_scopeTags[i].current.text != 'All') {
-                                var x = _scopeTags[i];
-                                queryParts.push(_scopeTags[i].name + "," + _scopeTags[i].current.text + ",:eq,:and");
-                            }
+
+                    /*
+                      This is for multi-value selection from templateSrv, not supported right now...
+                     if (_scopeTags) {
+                      for (var i = 0; i < _scopeTags.length; i++) {
+                        if (_scopeTags[i].current.text != 'All') {
+                          var x = _scopeTags[i];
+                          queryParts.push(_scopeTags[i].name + "," + _scopeTags[i].current.text + ",:eq,:and");
                         }
+                      }
                     }
+                    */
                     var hasPushAggregation = false;
 
                     if (target.tags) {
                         var logicals = [];
-                        for (var _i = 0, len = target.tags.length; _i < len; _i++) {
-                            var aTag = target.tags[_i];
+                        for (var i = 0, len = target.tags.length; i < len; i++) {
+                            var aTag = target.tags[i];
                             var valueReplaced = _this.templateSrv.replaceWithText(aTag.value);
                             // the replaced value for templates will be a comma separated list
                             if (valueReplaced.includes(',')) {
@@ -234,15 +245,40 @@ var AtlasDatasource = exports.AtlasDatasource = function () {
                         queryParts.push(aliasLegend);
                         queryParts.push(':legend');
                     }
-
                     queries.push(queryParts.join(','));
                 }
-            });
+                if (isNaN(target.stepNumber) && target.stepNumber != null) {
+                    alert("Only numbers are valid for the Step Size field");
+                }
+                if (target.stepNumber != null && target.stepNumber != this.stepNumber) {
+                    this.stepNumber = target.stepNumber;
+                    shouldUpdate = true;
+                }
+                if (target.stepUnit != null && target.stepUnit != this.stepUnit) {
+                    this.stepUnit = target.stepUnit;
+                    shouldUpdate = true;
+                }
+                if (shouldUpdate) {
+                    if (this.stepUnit == null || this.stepUnit === '') {
+                        this.stepUnit = 'm';
+                    }
+                    options.targets.forEach(function (target) {
+                        target.stepNumber = this.stepNumber;
+                        target.stepUnit = this.stepUnit;
+                    }, this);
+                }
+            }, this);
             // Atlas can take multiple concatenated stack queries
             var fullQuery = queries.join(',');
-
-            var interval = options.interval;
-            console.log("options interval = " + interval);
+            var interval = '1m';
+            if (this.stepNumber === 0) {
+                interval = options.interval;
+            } else {
+                //update all the other targets so that they are all the same
+                //console.log("step unit =" + this.stepUnit);
+                interval = this.stepNumber + this.stepUnit;
+            }
+            //console.log("options interval = " + interval );
             if (_kbn2.default.interval_to_ms(interval) < this.minimumInterval) {
                 // console.log("Detected interval smaller than allowed: " + interval);
                 interval = _kbn2.default.secondsToHms(this.minimumInterval / 1000);
@@ -315,7 +351,7 @@ var AtlasDatasource = exports.AtlasDatasource = function () {
                     return series;
                 }
 
-                var values = _lodash2.default.pluck(result.values, index);
+                var values = _lodash2.default.map(result.values, index);
 
                 var notAllZero = false;
                 var notAllNull = false;

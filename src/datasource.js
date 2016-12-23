@@ -326,7 +326,7 @@ export class AtlasDatasource {
                 return series;
             }
 
-            var values = _.pluck(result.values, index);
+            var values = _.map(result.values, index);
 
             var notAllZero = false;
             var notAllNull = false;
