@@ -1,4 +1,4 @@
-# Atlas plugin for Grafana 3.x
+# Atlas plugin for Grafana 3.x/4.x/5.x
 
 [Atlas by Netflix](https://github.com/Netflix/atlas) is a backend for managing dimensional time series data.
 
@@ -16,7 +16,7 @@ The query builder provides metric hints for tags on the fly, along with their di
 A "raw" query method is also available via a toggle in the query builder that will accept well-formed Atlas queries.
 
 ### Running with Docker
-A ``docker-compose.yml`` file is provided to easily stand up a Grafana 3.x server with this datasource mapped to the container.
+A ``docker-compose.yml`` file is provided to easily stand up a Grafana 3.x/4.x server with this datasource mapped to the container.
 
 ### Installation
 
